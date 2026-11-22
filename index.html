@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HON Visual</title>
+<meta name="description" content="HON Visual — визуальный мод для Minecraft 1.21.11 (Fabric): прозрачный HUD, свой прицел, 3D-ножи CS, небо, FPS Boost.">
+<meta property="og:title" content="HON Visual">
+<meta property="og:description" content="Прозрачный фиолетовый визуал для Minecraft 1.21.11">
+<meta property="og:image" content="icon.png">
+<meta name="theme-color" content="#0b0910">
+<link rel="icon" href="icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0b0910; --glass: rgba(255,255,255,.04); --edge: rgba(255,255,255,.09);
+  --text: #f2eff7; --muted: #a9a3b5; --dim: #6f6a7a; --acc: #a35cff; --acc2: #cda8ff;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg); color: var(--text); font-family: Manrope, system-ui, sans-serif;
+  line-height: 1.55; overflow-x: hidden;
+}
+body::before {
+  content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  background:
+    radial-gradient(60vmax 40vmax at 50% -10%, rgba(163,92,255,.18), transparent 60%),
+    radial-gradient(40vmax 30vmax at 100% 100%, rgba(163,92,255,.08), transparent 60%);
+}
+a { color: inherit; text-decoration: none; }
+.wrap { max-width: 1040px; margin: 0 auto; padding: 0 20px; }
+
+/* шапка */
+nav { position: sticky; top: 0; z-index: 10; backdrop-filter: blur(14px); background: rgba(11,9,16,.6); border-bottom: 1px solid var(--edge); }
+nav .wrap { display: flex; align-items: center; gap: 12px; height: 56px; }
+nav .brand { display: flex; align-items: center; gap: 9px; font-weight: 800; letter-spacing: .5px; }
+nav .brand svg { width: 26px; height: 22px; }
+nav .brand svg *, footer svg * { stroke-width: 20px; }
+nav .brand span { color: var(--acc2); }
+nav .links { margin-left: auto; display: flex; gap: 22px; font-size: 14px; color: var(--muted); }
+nav .links a:hover { color: var(--text); }
+
+/* логотип */
+.outer { fill: none; stroke: var(--text); stroke-width: 7; stroke-linejoin: round; }
+.inner { fill: none; stroke: var(--acc2); stroke-width: 7; stroke-linejoin: round; transform-origin: 566px 280px; animation: breathe 3.4s ease-in-out infinite, shimmer 5s ease-in-out infinite; }
+@keyframes breathe { 0%,100% { transform: scale(.93); } 50% { transform: scale(1); } }
+@keyframes shimmer { 0%,100% { stroke: #a35cff; } 40% { stroke: #cda8ff; } 70% { stroke: #ece0ff; } }
+
+/* главный блок */
+.hero { text-align: center; padding: 90px 0 70px; }
+.hero .logo { width: min(300px, 70vw); height: auto; filter: drop-shadow(0 0 40px rgba(163,92,255,.35)); animation: rise .9s ease both; }
+.hero h1 { font-size: clamp(40px, 8vw, 72px); font-weight: 800; letter-spacing: 1px; margin-top: 26px; animation: rise .9s .1s ease both; }
+.hero h1 span { color: var(--acc2); }
+.hero p { color: var(--muted); font-size: 18px; max-width: 560px; margin: 12px auto 0; animation: rise .9s .2s ease both; }
+@keyframes rise { from { opacity: 0; transform: translateY(14px); } }
+.cta { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 34px; animation: rise .9s .3s ease both; }
+.btn {
+  display: inline-flex; align-items: center; gap: 10px; padding: 14px 26px; border-radius: 12px; font-weight: 700;
+  border: 1px solid var(--edge); background: var(--glass); transition: .2s;
+}
+.btn:hover { background: rgba(255,255,255,.08); transform: translateY(-2px); }
+.btn.main { background: var(--acc); border-color: transparent; color: #fff; box-shadow: 0 10px 40px rgba(163,92,255,.35); }
+.btn.main:hover { background: #b274ff; }
+.btn small { font-weight: 400; opacity: .75; }
+.meta { margin-top: 18px; font-size: 13px; color: var(--dim); }
+
+/* секции */
+section { padding: 60px 0; }
+h2 { font-size: 30px; font-weight: 800; margin-bottom: 8px; }
+h2 + .sub { color: var(--muted); margin-bottom: 30px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 14px; }
+.card {
+  position: relative; padding: 20px 20px 20px 22px; border-radius: 14px; background: var(--glass); border: 1px solid var(--edge);
+  transition: .25s; overflow: hidden;
+}
+.card::before { content: ""; position: absolute; left: 0; top: 16px; bottom: 16px; width: 2px; border-radius: 2px; background: var(--acc); opacity: .85; }
+.card:hover { background: rgba(255,255,255,.065); transform: translateY(-3px); }
+.card h3 { font-size: 16px; font-weight: 700; margin-bottom: 6px; }
+.card p { font-size: 14px; color: var(--muted); }
+
+/* HUD-превью */
+.hud { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; align-items: center; margin: 10px 0 40px; }
+.pill { padding: 8px 14px; border-radius: 9px; background: rgba(12,10,18,.55); border: 1px solid var(--edge); font-size: 14px; position: relative; padding-left: 16px; }
+.pill::before { content: ""; position: absolute; left: 5px; top: 8px; bottom: 8px; width: 2px; border-radius: 2px; background: var(--acc); }
+.pill b { color: var(--text); } .pill i { color: var(--acc2); font-style: normal; } .pill s { color: var(--muted); text-decoration: none; }
+.keys { display: grid; grid-template-columns: repeat(3, 34px); gap: 4px; }
+.key { height: 34px; border-radius: 6px; display: grid; place-items: center; font-size: 12px; font-weight: 700; color: var(--muted); background: rgba(12,10,18,.55); border: 1px solid var(--edge); }
+.key.on { background: rgba(163,92,255,.7); color: #fff; border-color: var(--acc); }
+.key.w { grid-column: 2; } .key.blank { visibility: hidden; }
+
+/* установка */
+ol.steps { list-style: none; counter-reset: s; display: grid; gap: 12px; }
+ol.steps li { counter-increment: s; display: flex; gap: 16px; align-items: flex-start; padding: 16px 18px; border-radius: 14px; background: var(--glass); border: 1px solid var(--edge); }
+ol.steps li::before { content: counter(s); flex: none; width: 30px; height: 30px; border-radius: 9px; display: grid; place-items: center; font-weight: 800; background: rgba(163,92,255,.18); color: var(--acc2); }
+ol.steps code { background: rgba(255,255,255,.07); padding: 2px 7px; border-radius: 6px; font-size: 13px; color: var(--acc2); word-break: break-all; }
+ol.steps a { color: var(--acc2); border-bottom: 1px solid rgba(205,168,255,.35); }
+
+/* клавиши */
+.binds { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
+.bind { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; background: var(--glass); border: 1px solid var(--edge); color: var(--muted); font-size: 14px; }
+.bind kbd { font-family: inherit; font-weight: 700; font-size: 12px; color: var(--text); padding: 5px 9px; border-radius: 7px; background: rgba(255,255,255,.08); border: 1px solid var(--edge); white-space: nowrap; }
+
+footer { padding: 40px 0 60px; text-align: center; color: var(--dim); font-size: 13px; border-top: 1px solid var(--edge); margin-top: 40px; }
+footer svg { width: 34px; height: 28px; margin-bottom: 8px; opacity: .8; }
+
+@media (max-width: 640px) {
+  nav .links { gap: 14px; font-size: 13px; }
+  nav .links a.hide-m { display: none; }
+  .hero { padding: 60px 0 50px; }
+  section { padding: 44px 0; }
+}
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <a class="brand logo" href="#"><svg viewBox="372 115 388 329"><polygon class="outer" points="566,128 631,204 747,204 689,280 747,355 631,355 566,431 500,355 385,355 443,280 385,204 500,204"/><g class="inner"><polygon points="568,220 598,263 697,265 621,290 648,333 568,308 489,334 517,290 441,265 538,263"/><polygon points="566,258 579,277 626,282 584,290 566,306 549,290 508,285 553,278"/></g></svg>HON <span>VISUAL</span></a>
+    <div class="links">
+      <a href="#features">Функции</a>
+      <a href="#install">Установка</a>
+      <a class="hide-m" href="#keys">Клавиши</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero wrap">
+  <svg class="logo" viewBox="372 115 388 329" aria-label="Логотип HON"><polygon class="outer" points="566,128 631,204 747,204 689,280 747,355 631,355 566,431 500,355 385,355 443,280 385,204 500,204"/><g class="inner"><polygon points="568,220 598,263 697,265 621,290 648,333 568,308 489,334 517,290 441,265 538,263"/><polygon points="566,258 579,277 626,282 584,290 566,306 549,290 508,285 553,278"/></g></svg>
+  <h1>HON <span>VISUAL</span></h1>
+  <p>Прозрачный визуал для Minecraft с лёгким фиолетовым акцентом. HUD, прицел, 3D-ножи, небо и FPS Boost — в одном моде.</p>
+  <div class="cta">
+    <a class="btn main" href="HON-Visual-1.21.11.jar" download>⬇ Скачать <small>для 1.21.11</small></a>
+    <a class="btn" href="#install">Как установить</a>
+  </div>
+  <div class="meta">Fabric · Minecraft 1.21.11 · нужен Fabric API</div>
+</header>
+
+<section class="wrap">
+  <div class="hud" aria-hidden="true">
+    <div class="pill"><b>HON</b> <i>VISUAL</i> &nbsp;<s>· 144 fps · 21:47</s></div>
+    <div class="pill"><s>FPS</s> <b>144</b> &nbsp;<s>PING</s> <i>32</i></div>
+    <div class="pill"><s>CPS</s> <b>11</b> <s>|</s> <b>3</b></div>
+    <div class="pill"><s>XYZ</s> <b>128 64 -512</b></div>
+    <div class="keys">
+      <div class="key blank"></div><div class="key on">W</div><div class="key blank"></div>
+      <div class="key">A</div><div class="key on">S</div><div class="key">D</div>
+    </div>
+  </div>
+</section>
+
+<section id="features" class="wrap">
+  <h2>Функции</h2>
+  <p class="sub">Каждую можно включить, выключить и настроить — правой кнопкой по функции в меню.</p>
+  <div class="grid">
+    <div class="card"><h3>Прозрачный HUD</h3><p>FPS и пинг, CPS, координаты, информация, ник с головой скина, броня. Всё двигается в редакторе.</p></div>
+    <div class="card"><h3>WASD и клавиатура</h3><p>Нажатые клавиши подсвечиваются фиолетовым. Есть целая клавиатура и мышь с направлением.</p></div>
+    <div class="card"><h3>Индикатор цели</h3><p>Ник, здоровье, броня и расстояние до того, на кого смотришь или кого бил.</p></div>
+    <div class="card"><h3>Эффекты зелий</h3><p>Значок, уровень, время и полоска — вместо стандартных значков.</p></div>
+    <div class="card"><h3>Свой прицел</h3><p>Крест, точка, круг или T. Цвет, размер, зазор, обводка и раскрытие при беге.</p></div>
+    <div class="card"><h3>3D-ножи CS</h3><p>Керамбит, бабочка, классический и тычки — настоящая 3D-модель в руке, осмотр на Y.</p></div>
+    <div class="card"><h3>Небо</h3><p>Фиолетовое, звёздная ночь, розовый закат, глубокий космос. Туман под цвет неба.</p></div>
+    <div class="card"><h3>FPS Boost</h3><p>Облака, частицы, тени, освещение — отключай по отдельности, чтобы поднять FPS.</p></div>
+    <div class="card"><h3>Рамка блока и искры</h3><p>Тонкая фиолетовая рамка выделения и фиолетовые частицы при ударе.</p></div>
+    <div class="card"><h3>Своё меню</h3><p>Главное меню, меню паузы и экран загрузки в стиле HON. Стеклянные сундуки.</p></div>
+    <div class="card"><h3>Авто-спринт и камера</h3><p>Бег без Ctrl и свободная камера на Alt — осмотрись, не поворачиваясь.</p></div>
+    <div class="card"><h3>Профили и Discord</h3><p>PvP / Красиво — одной кнопкой. Статус в Discord: друзья видят, что ты играешь с HON.</p></div>
+  </div>
+</section>
+
+<section id="install" class="wrap">
+  <h2>Установка</h2>
+  <p class="sub">Пара минут, ничего сложного.</p>
+  <ol class="steps">
+    <li><div>Поставь <a href="https://fabricmc.net/use/installer/" target="_blank" rel="noopener">Fabric Loader</a> для версии <code>1.21.11</code>.</div></li>
+    <li><div>Скачай <a href="https://modrinth.com/mod/fabric-api/versions?g=1.21.11" target="_blank" rel="noopener">Fabric API</a> для 1.21.11 и <a href="HON-Visual-1.21.11.jar" download>HON Visual</a>.</div></li>
+    <li><div>Положи оба файла в папку <code>%appdata%\.minecraft\mods</code> (нажми Win + R, вставь путь, Enter).</div></li>
+    <li><div>Запусти Minecraft с профилем Fabric и нажми <code>правый Shift</code> — откроется меню HON.</div></li>
+  </ol>
+</section>
+
+<section id="keys" class="wrap">
+  <h2>Клавиши</h2>
+  <p class="sub">Можно поменять в настройках управления игры.</p>
+  <div class="binds">
+    <div class="bind"><kbd>Правый Shift</kbd> меню HON</div>
+    <div class="bind"><kbd>Left Alt</kbd> свободная камера</div>
+    <div class="bind"><kbd>Y</kbd> осмотр ножа</div>
+    <div class="bind"><kbd>ПКМ</kbd> по функции — настройки</div>
+  </div>
+</section>
+
+<footer class="wrap">
+  <svg class="logo" viewBox="372 115 388 329"><polygon class="outer" points="566,128 631,204 747,204 689,280 747,355 631,355 566,431 500,355 385,355 443,280 385,204 500,204"/><g class="inner"><polygon points="568,220 598,263 697,265 621,290 648,333 568,308 489,334 517,290 441,265 538,263"/><polygon points="566,258 579,277 626,282 584,290 566,306 549,290 508,285 553,278"/></g></svg>
+  <div>HON Visual · мод для Minecraft 1.21.11</div>
+  <div style="margin-top:4px">Не связан с Mojang и Microsoft.</div>
+</footer>
+
+</body>
+</html>
